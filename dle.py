@@ -21,7 +21,7 @@ def getChlg(c, slt, s1, s2, n, table):
         for j in range(n-1, -1, -1):
             arr[j] = chr(ord(arr[j]) + 1)
 
-            if ord(arr[j]) <= ord(s2):
+            if arr[j] <= s2:
                 break
             else:
                 arr[j] = s1
@@ -70,7 +70,16 @@ def doRequest(requestUrl, rf):
 
     chlg = getChlg(c, slt, s1, s2, n, table)
 
-    payload = (('TS017111a7_id', '3'), ('TS017111a7_cr', first + ':' + chlg + ':' + slt + ':' + str(c)), ('TS017111a7_76', '0'), ('TS017111a7_86', '0'), ('TS017111a7_md', '1'), ('TS017111a7_rf', rf), ('TS017111a7_ct', '0'), ('TS017111a7_pd', '0'))
+    cr = first + ':' + chlg + ':' + slt + ':' + str(c)
+
+    payload = (('TS017111a7_id', '3'),
+               ('TS017111a7_cr', cr),
+               ('TS017111a7_76', '0'),
+               ('TS017111a7_86', '0'),
+               ('TS017111a7_md', '1'),
+               ('TS017111a7_rf', rf),
+               ('TS017111a7_ct', '0'),
+               ('TS017111a7_pd', '0'))
 
     s.headers.update({'Referer': requestUrl})
     s.headers.update({'Accept-Encoding': 'gzip, deflate'})
@@ -93,13 +102,13 @@ def search(word):
     url1 = host + '/?w=' + word
     url2 = host + '/srv/search?w=' + word
 
-    doRequest(url1, referer)
-    response = doRequest(url2, url2)
+    doRequest(url1, referer)          # get the cookie
+    response = doRequest(url2, url2)  # get the definition
 
     soup = bs4.BeautifulSoup(response.text, parser)
 
-    print(soup.find('article').get_text())
+    return soup.find('article').get_text()
 
 
 if __name__ == '__main__':
-    search(sys.argv[1])
+    print(search(sys.argv[1]))
