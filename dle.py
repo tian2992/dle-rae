@@ -3,7 +3,6 @@
 import bs4
 import ctypes
 import requests
-import sys
 
 host = 'http://dle.rae.es'
 referer = 'http://www.rae.es/'
@@ -12,7 +11,7 @@ parser = 'lxml'
 s = requests.Session()
 
 
-def getChlg(c, slt, s1, s2, n, table):
+def solveChallenge(c, slt, s1, s2, n, table):
     m = pow(ord(s2) - ord(s1) + 1, n)
 
     arr = [s1] * n
@@ -68,7 +67,7 @@ def doRequest(requestUrl, rf):
     tmp = response.index('var table = \"') + 13
     table = response[tmp:response.index('\"', tmp)]
 
-    chlg = getChlg(c, slt, s1, s2, n, table)
+    chlg = solveChallenge(c, slt, s1, s2, n, table)
 
     cr = first + ':' + chlg + ':' + slt + ':' + str(c)
 
@@ -107,8 +106,31 @@ def search(word):
 
     soup = bs4.BeautifulSoup(response.text, parser)
 
-    return soup.find('article').get_text()
+    f0 = soup.find('div', id='f0')
 
+    if f0:  # this exists if the word was not found
+        result = f0.find('span').text
+    else:
+        article = soup.find('article')
 
-if __name__ == '__main__':
-    print(search(sys.argv[1]))
+        if article:
+            result = article.get_text()
+        else:
+            options = soup.findAll('a')
+            links = []
+            i = 1
+
+            for op in options:
+                links.append(op.get('href'))
+                print(str(i) + '. ' + op.text)
+                i += 1
+
+            opt = int(input('\nSeleccione una opcion: ')) - 1
+
+            url3 = host + '/srv/' + links[opt]
+
+            response = s.get(url3)
+            soup = bs4.BeautifulSoup(response.text, parser)
+            result = soup.find('article').get_text()
+
+    return result
