@@ -3,6 +3,7 @@
 import bs4
 import ctypes
 import requests
+import time
 
 host = 'http://dle.rae.es'
 referer = 'http://www.rae.es/'
@@ -88,6 +89,15 @@ def doRequest(requestUrl, rf):
     return s.post(requestUrl, data=payload)
 
 
+def conjugate(name, data, col):
+    result = name + '\n'
+
+    for i in range(0, 8):
+        result += data[i][0] + ' ' + data[i][col] + '\n'
+
+    return result
+
+
 def search(word):
     s.headers.update({'Upgrade-Insecure-Requests': '1'})
     s.headers.update({'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'})
@@ -132,5 +142,46 @@ def search(word):
             response = s.get(url3)
             soup = bs4.BeautifulSoup(response.text, parser)
             result = soup.find('article').get_text()
+
+        e2 = soup.find('a', class_='e2')
+
+        if e2:
+            url4 = host + '/srv/' + e2['href']
+
+            time.sleep(3)
+
+            response = s.get(url4)
+            soup = bs4.BeautifulSoup(response.text, parser)
+
+            rows = soup.find('table', class_='cnj').find_all('tr')
+
+            data = []
+
+            for row in rows:
+                cols = [ele.text.strip() for ele in row.find_all('td')]
+                data.append([ele for ele in cols if ele])
+
+            data = [e for e in data if e]
+
+            conjugation = 'Formas no personales\n'
+            conjugation += 'Infinitivo: ' + data[0][0] + '\n'
+            conjugation += 'Gerundio: ' + data[0][1] + '\n'
+            conjugation += 'Participio: ' + data[1][0] + '\n'
+            conjugation += '\n'
+            conjugation += conjugate('Indicativo Presente', data[2:10], 1) + '\n'
+            conjugation += conjugate('Indicativo Pretérito imperfecto / Copretérito', data[2:10], 2) + '\n'
+            conjugation += conjugate('Indicativo Pretérito perfecto simple / Pretérito', data[10:18], 1) + '\n'
+            conjugation += conjugate('Indicativo Futuro simple / Futuro', data[10:18], 2) + '\n'
+            conjugation += conjugate('Indicativo Condicional simple / Pospretérito', data[18:26], 1) + '\n'
+            conjugation += conjugate('Subjuntivo Presente', data[26: 34], 1) + '\n'
+            conjugation += conjugate('Subjuntivo Futuro simple / Futuro', data[26: 34], 2) + '\n'
+            conjugation += conjugate('Subjuntivo Pretérito imperfecto / Copretérito', data[34:42], 1) + '\n'
+            conjugation += 'Imperativo' + '\n'
+            conjugation += data[42][0] + ' ' + data[42][1] + '\n'
+            conjugation += data[43][0] + ' ' + data[43][1] + '\n'
+            conjugation += data[44][0] + ' ' + data[44][1] + '\n'
+            conjugation += data[45][0] + ' ' + data[45][1]
+
+            result += '\n' + conjugation + '\n'
 
     return result
