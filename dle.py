@@ -156,27 +156,30 @@ def search(word):
             rows = soup.find('table', class_='cnj').find_all('tr')
 
             data = []
+            headers = []
 
             for row in rows:
-                cols = [ele.text.strip() for ele in row.find_all('td')]
-                data.append([ele for ele in cols if ele])
+                cells = [cell.text.strip() for cell in row.find_all('td')]
+                data.append([cell for cell in cells if cell])
+                heads = [header.text.strip() for header in row.find_all('th')]
+                headers.append([header for header in heads if header])
 
             data = [e for e in data if e]
 
-            conjugation = 'Formas no personales\n'
-            conjugation += 'Infinitivo: ' + data[0][0] + '\n'
-            conjugation += 'Gerundio: ' + data[0][1] + '\n'
-            conjugation += 'Participio: ' + data[1][0] + '\n'
+            conjugation = headers[0][0] + '\n'
+            conjugation += headers[1][0] + ': ' + data[0][0] + '\n'
+            conjugation += headers[1][1] + ': ' + data[0][1] + '\n'
+            conjugation += headers[3][0] + ': ' + data[1][0] + '\n'
             conjugation += '\n'
-            conjugation += conjugate('Indicativo Presente', data[2:10], 1) + '\n'
-            conjugation += conjugate('Indicativo Pretérito imperfecto / Copretérito', data[2:10], 2) + '\n'
-            conjugation += conjugate('Indicativo Pretérito perfecto simple / Pretérito', data[10:18], 1) + '\n'
-            conjugation += conjugate('Indicativo Futuro simple / Futuro', data[10:18], 2) + '\n'
-            conjugation += conjugate('Indicativo Condicional simple / Pospretérito', data[18:26], 1) + '\n'
-            conjugation += conjugate('Subjuntivo Presente', data[26: 34], 1) + '\n'
-            conjugation += conjugate('Subjuntivo Futuro simple / Futuro', data[26: 34], 2) + '\n'
-            conjugation += conjugate('Subjuntivo Pretérito imperfecto / Copretérito', data[34:42], 1) + '\n'
-            conjugation += 'Imperativo' + '\n'
+            conjugation += conjugate(headers[5][0] + ' ' + headers[6][3], data[2:10], 1) + '\n'
+            conjugation += conjugate(headers[5][0] + ' ' + headers[6][4], data[2:10], 2) + '\n'
+            conjugation += conjugate(headers[5][0] + ' ' + headers[15][0], data[10:18], 1) + '\n'
+            conjugation += conjugate(headers[5][0] + ' ' + headers[15][1], data[10:18], 2) + '\n'
+            conjugation += conjugate(headers[5][0] + ' ' + headers[24][0], data[18:26], 1) + '\n'
+            conjugation += conjugate(headers[33][0] + ' ' + headers[34][3], data[26: 34], 1) + '\n'
+            conjugation += conjugate(headers[33][0] + ' ' + headers[34][4], data[26: 34], 2) + '\n'
+            conjugation += conjugate(headers[33][0] + ' ' + headers[43][0], data[34:42], 1) + '\n'
+            conjugation += headers[52][0] + '\n'
             conjugation += data[42][0] + ' ' + data[42][1] + '\n'
             conjugation += data[43][0] + ' ' + data[43][1] + '\n'
             conjugation += data[44][0] + ' ' + data[44][1] + '\n'
