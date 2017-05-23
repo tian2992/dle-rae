@@ -47,6 +47,7 @@ def solveChallenge(c, slt, s1, s2, n, table):
 def doRequest(requestUrl, rf):
     response = s.get(requestUrl).text
 
+    ## Should add a try-catch here, Response might not include the substring value.
     tmp = response.index('document.forms[0].elements[1].value=\"') + 37
     first = response[tmp:response.index(':', tmp)]
 
@@ -135,6 +136,7 @@ def search(word):
                 print(str(i) + '. ' + op.text)
                 i += 1
 
+            ## This should not depend on user interaction.
             opt = int(input('\nSeleccione una opcion: ')) - 1
 
             url3 = host + '/srv/' + links[opt]
